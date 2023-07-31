@@ -10,31 +10,36 @@
 import {defineComponent} from 'vue'
 import {Graph, Path} from '@antv/x6'
 import {register, getTeleport} from '@antv/x6-vue-shape'
-import TagNode from "@/components/TagNode.vue";
 import Hierarchy from "@antv/hierarchy";
 import insertCss from 'insert-css'
+import LogicalNode from "@/components/LogicalNode.vue";
+import ComparisonsNode from "@/components/ComparisonsNode.vue";
+
 
 register({
-  shape: 'custom-vue-node',
-  width: 100,
-  height: 100,
-  component: TagNode,
+  shape: 'login-node',
+  component: LogicalNode
+})
+register({
+  shape: 'comparison-node',
+  component: ComparisonsNode
 })
 Graph.registerEdge(
     'mindmap-edge',
     {
       inherit: 'edge',
+      router: {
+        name: 'manhattan',
+        args: {
+          startDirections: ['right'],
+          endDirections: ['left']
+        }
+      },
       connector: {
-        name: 'mindmap',
+        name: 'rounded'
       },
-      attrs: {
-        line: {
-          targetMarker: '',
-          stroke: '#A2B1C3',
-          strokeWidth: 2,
-        },
-      },
-      zIndex: 0,
+      attrs: {}, //样式代码
+      zIndex: 0
     },
     true,
 )
@@ -56,6 +61,80 @@ Graph.registerConnector(
     true,
 )
 
+Graph.registerNode('relative', {
+  inherit: 'rect',
+  markup: [
+    {
+      tagName: 'rect',
+      selector: 'body'
+    },
+    {
+      tagName: 'image',
+      selector: 'switch'
+    },
+    {
+      tagName: 'text',
+      selector: 'label_text'
+    },
+
+  ],
+  attrs: { //样式代码
+    body: {},
+    switch: {
+      event: 'change:relative', //关系节点 切换 关系事件
+      width: 16,
+      height: 16,
+      x: 12,
+      y: 12,
+    },
+    label_text: {text: '并且'}
+  },
+  data: {relative: 'and'} //and并且 or或者 默认为 并且
+})
+Graph.registerNode('condition-text', {
+      inherit: 'rect',
+      markup: [
+        {
+          tagName: 'rect',
+          selector: 'body'
+        },
+        {
+          tagName: 'g',
+          attrs: { class: 'content' },
+          children: [
+            {
+              tagName: 'text',
+              textContent: "指标值",
+              attrs: {
+                x: 0,
+                width: 20
+              }
+            },
+            {
+              tagName: 'text',
+              textContent: "等于",
+              attrs: {
+                x: 20,
+                width: 20
+              }
+            },
+            {
+              tagName: 'text',
+              textContent: "123",
+              attrs: {
+                x: 40,
+                width: 20
+              }
+            }
+          ]
+        },
+      ],
+      attrs: {
+        body: {}
+      }//样式代码
+    }
+)
+
 const TeleportContainer = getTeleport()
 
 let graph = null;
@@ -67,34 +146,88 @@ export default defineComponent({
   mounted() {
     graph = new Graph({
       container: document.getElementById('container'),
+      panning: { enabled: true },
+      selecting: { enabled: true },
+      keyboard: { enabled: true },
+      grid: true,
       connecting: {
+        router: 'manhattan',
+        connector: {
+          name: 'rounded',
+          args: {
+            radius: 8,
+          },
+        },
+        anchor: 'center',
         connectionPoint: 'anchor',
+        allowBlank: false,
+        snap: {
+          radius: 20,
+        },
       },
+      mousewheel: {
+        enabled: true,
+        modifiers: ['ctrl', 'meta']
+      },
+      interacting: { nodeMovable: false }
     })
     render()
   },
 })
 var data = {
   id: "1",
+  type: 'login-node',
   data: {
     text: "AND"
   },
   isRoot: true,
-  width: 160,
-  height: 50,
+  width: 100,
+  height: 40,
   children: [
     {
+      id: "4",
+      type: 'login-node',
+      data: {
+        text: "OR"
+      },
+      isRoot: true,
+      width: 100,
+      height: 40,
+      children: [
+        {
+          id: "5",
+          type: 'comparison-node',
+          width: 160,
+          height: 30,
+          data: {
+            text: "indCode = '123'"
+          }
+        },
+        {
+          id: "6",
+          type: 'comparison-node',
+          width: 160,
+          height: 40,
+          data: {
+            text: "dataType = 1"
+          }
+        }
+      ]
+    },
+    {
       id: "2",
+      type: 'comparison-node',
       width: 160,
-      height: 50,
+      height: 30,
       data: {
         text: "indCode = '123'"
       }
     },
     {
       id: "3",
+      type: 'comparison-node',
       width: 160,
-      height: 50,
+      height: 40,
       data: {
         text: "dataType = 1"
       }
@@ -125,11 +258,10 @@ const render = () => {
   const traverse = (hierarchyItem) => {
     if (hierarchyItem) {
       const {data, children} = hierarchyItem
-      console.log(hierarchyItem)
       cells.push(
           graph.createNode({
             id: data.id,
-            shape: 'custom-vue-node',
+            shape: data.type,
             width: data.width,
             height: data.height,
             data: data.data,
@@ -142,10 +274,14 @@ const render = () => {
           const {id} = item
           cells.push(
               graph.createEdge({
+                shape: 'mindmap-edge',
                 source: {
                   cell: data.id,
                   anchor: {
-                    name: 'right',
+                    name:  'center',
+                    args: {
+                      dx: '25%'
+                    }
                   }
                 },
                 target: {
@@ -154,7 +290,6 @@ const render = () => {
                     name: 'left'
                   }
                 },
-                sharp: 'mindmap-edge'
               }))
           traverse(item)
         })
@@ -162,9 +297,9 @@ const render = () => {
     }
   }
   traverse(result)
+  console.log(cells)
   graph.resetCells(cells)
   graph.centerContent()
-  graph.zoomToFit({padding: 10, maxScale: 1})
 }
 
 insertCss(`

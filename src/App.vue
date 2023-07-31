@@ -1,14 +1,19 @@
 <template>
+  <n-message-provider>
   <ConditionEditor/>
+  </n-message-provider>
 </template>
 
 <script>
 import ConditionEditor from './components/Condition-Editor.vue'
-
+import {NMessageProvider} from "naive-ui";
 export default {
   name: 'App',
   components: {
-    ConditionEditor
+    ConditionEditor,
+    NMessageProvider
+  },
+  setup() {
   }
 }
 </script>
