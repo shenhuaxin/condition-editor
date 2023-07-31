@@ -1,19 +1,33 @@
 <template>
-  <n-message-provider>
-  <ConditionEditor/>
-  </n-message-provider>
+  <n-config-provider :theme-overrides="themeOverrides">
+    <n-message-provider>
+      <ConditionEditor/>
+    </n-message-provider>
+  </n-config-provider>
 </template>
 
 <script>
 import ConditionEditor from './components/Condition-Editor.vue'
-import {NMessageProvider} from "naive-ui";
+import {NMessageProvider, NConfigProvider} from "naive-ui";
+
+
+
 export default {
   name: 'App',
   components: {
     ConditionEditor,
-    NMessageProvider
+    NMessageProvider,
+    NConfigProvider
   },
   setup() {
+    const themeOverrides = {
+      common: {
+        primaryColor: '#000'
+      }
+    }
+    return {
+      themeOverrides
+    }
   }
 }
 </script>
