@@ -1,6 +1,6 @@
 <template>
   <div class="app-content">
-    <div style="height: 400px" id="container"></div>
+    <div style="height: 1000px" id="container"></div>
     <TeleportContainer/>
   </div>
 </template>
@@ -14,15 +14,23 @@ import Hierarchy from "@antv/hierarchy";
 import insertCss from 'insert-css'
 import LogicalNode from "@/components/LogicalNode.vue";
 import ComparisonsNode from "@/components/ComparisonsNode.vue";
+import mitt from "mitt";
+import emitter from "@/util/mitt.ts";
+import EditStateNode from "@/components/EditStateNode";
+import {isLogical} from "@/util/node.ts";
 
 
 register({
-  shape: 'login-node',
+  shape: 'logical-node',
   component: LogicalNode
 })
 register({
   shape: 'comparison-node',
   component: ComparisonsNode
+})
+register({
+  shape: 'edit-state-node',
+  component: EditStateNode
 })
 Graph.registerEdge(
     'mindmap-edge',
@@ -143,6 +151,65 @@ export default defineComponent({
   components: {
     TeleportContainer,
   },
+  setup() {
+    const findItem = (data, id) => {
+      if (data.id === id) {
+        return {
+          parent: null,
+          node: data,
+        }
+      }
+      const { children } = data
+      if (children) {
+        for (let i = 0, len = children.length; i < len; i += 1) {
+          const res = findItem(children[i], id)
+          if (res) {
+            return {
+              parent: res.parent || data,
+              node: res.node,
+            }
+          }
+        }
+      }
+      return null
+    }
+    emitter.on('node:add', (event) => {
+      var parentId = event.id;
+      var item = findItem(data, parentId)?.node;
+      console.log(item)
+      if (item) {
+        var newNode;
+        if (isLogical(event.type)) {
+          newNode = {
+            id: Math.random(),
+            type: 'logical-node',
+            width: 100,
+            height: 30,
+            data: {
+              text: event.type
+            }
+          }
+        } else {
+          newNode = {
+            id: Math.random(),
+            type: 'edit-state-node',
+            width: 500,
+            height: 30,
+            data: {
+              text: "indCode = '123'"
+            }
+          }
+        }
+        if (item.children) {
+          item.children.push(newNode);
+        } else {
+          item.children = [newNode]
+        }
+      }
+      render()
+    })
+
+  },
   mounted() {
     graph = new Graph({
       container: document.getElementById('container'),
@@ -176,7 +243,7 @@ export default defineComponent({
 })
 var data = {
   id: "1",
-  type: 'login-node',
+  type: 'logical-node',
   data: {
     text: "AND"
   },
@@ -186,7 +253,7 @@ var data = {
   children: [
     {
       id: "4",
-      type: 'login-node',
+      type: 'logical-node',
       data: {
         text: "OR"
       },

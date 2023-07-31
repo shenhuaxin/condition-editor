@@ -7,24 +7,26 @@
                   @click="change">
           <template #icon>
             <n-icon>
-              <SwitchIcon/>
+              <switch-icon/>
             </n-icon>
           </template>
           {{ data.text }}
         </n-button>
       </template>
       <n-space>
-        <n-button @click="addChildNode" quaternary circle>
-          <template #icon>
-            <n-icon color="#fff">
-              <AddIcon/>
-            </n-icon>
-          </template>
-        </n-button>
+        <n-popselect v-model:value="addNodeType"  @click="addChildNode(addNodeType)" :options="options" trigger="hover">
+          <n-button quaternary circle>
+            <template #icon>
+              <n-icon color="#fff">
+                <add-icon/>
+              </n-icon>
+            </template>
+          </n-button>
+        </n-popselect>
         <n-button @click="deleteNode" quaternary circle>
           <template #icon>
             <n-icon color="#fff">
-              <DeleteIcon/>
+              <delete-icon/>
             </n-icon>
           </template>
         </n-button>
@@ -35,12 +37,13 @@
 </template>
 
 <script>
-import {defineComponent, getCurrentInstance, inject, onMounted, ref} from 'vue'
-import {NButton, NIcon, NPopover, useMessage} from 'naive-ui'
+import {defineComponent, inject, onMounted, ref} from 'vue'
+import {NButton, NIcon, NPopover, useMessage, NSpace, NPopselect} from 'naive-ui'
 import SwitchIcon from "@/assets/Switch-Icon.vue";
 import DeleteIcon from "@/assets/DeleteIcon.vue";
 import AddIcon from "@/assets/AddIcon.vue";
 import EditIcon from "@/assets/EditIcon.vue";
+import emitter from "@/util/mitt.ts";
 
 export default defineComponent({
   name: 'LogicalNode',
@@ -52,10 +55,13 @@ export default defineComponent({
     NIcon,
     SwitchIcon,
     NPopover,
+    NSpace,
+    NPopselect
   },
   setup(prop) {
     var message = useMessage()
     let data = ref({})
+    var addNodeType = ref("");
     const getNode = inject('getNode')
     var node = getNode()
     onMounted(() => {
@@ -71,12 +77,32 @@ export default defineComponent({
     let updateText = function () {
       data.value = node.getData()
     }
-    let addChildNode = function () {
-
+    let addChildNode = function (value) {
+      emitter.emit('node:add', {id: node.id, type: value})
     }
     let deleteNode = function () {
     }
+    const options = [
+      {
+        label: "AND",
+        value: "$and"
+      },
+      {
+        label: "OR",
+        value: "$or"
+      },
+      {
+        label: "=",
+        value: "$eq"
+      },
+      {
+        label: "!=",
+        value: "$neq"
+      }
+    ]
     return {
+      addNodeType,
+      options,
       data,
       change,
       addChildNode,
