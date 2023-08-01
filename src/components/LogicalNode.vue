@@ -92,30 +92,17 @@ export default defineComponent({
         value: "$and"
       },
       {
-        label: "OR",
-        value: "$or"
-      },
-      {
         label: "=",
         value: "$eq"
       },
-      {
-        label: "!=",
-        value: "$neq"
-      }
     ]
     var logicalType = node.getData().logicalType
     const btnStyle = computed(() => {
       if (logicalType === '$and') {
-        return "width: 100px; color: rgb(50,96,223); background-color: rgba(193, 213, 253, 1)"
+        return "width: 100px; height: 30px; line-height: 30px; display: table-cell; text-align:center; color: rgb(50,96,223); background-color: rgba(193, 213, 253, 1)"
       } else if (logicalType === '$or') {
-        return "width: 100px; color: rgb(22,109,66); background-color: rgba(196, 229, 211, 1)"
+        return "width: 100px; height: 30px;line-height: 30px; display: table-cell; text-align:center;  color: rgb(22,109,66); background-color: rgba(196, 229, 211, 1)"
       }
-      // if (logicalType === '$and') {
-      //   return "width: 100px; height: 30px; line-height: 30px; display: table-cell; text-align:center; color: rgb(50,96,223); background-color: rgba(193, 213, 253, 1)"
-      // } else if (logicalType === '$or') {
-      //   return "width: 100px; height: 30px;line-height: 30px; display: table-cell; text-align:center;  color: rgb(22,109,66); background-color: rgba(196, 229, 211, 1)"
-      // }
       return ""
     })
 

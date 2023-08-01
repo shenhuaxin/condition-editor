@@ -223,31 +223,20 @@ export default defineComponent({
       currentItem.node.data = event.data
       render()
     })
-    // emitter.on('node:editing', (event) => {
-    //   var currentItem = findItem(data, event.id);
-    //   var node = currentItem.node;
-    //   // var newNode = {}
-    //   // newNode.type = 'edit-state-node'
-    //   // newNode.data = {
-    //   //   field: event.data.field,
-    //   //   comparison: event.data.comparison,
-    //   //   value: event.data.value
-    //   // }
-    //   // newNode.height = 30
-    //   // newNode.width = 500
-    //   // newNode.id = Math.random()
-    //   // currentItem.parent.children.push(newNode)
-    //   var newNode = {
-    //     id: Math.random(),
-    //     type: 'edit-state-node',
-    //     width: 500,
-    //     height: 30,
-    //     data: {
-    //     }
-    //   }
-    //   // currentItem.node.children.push(newNode)
-    //   // render()
-    // })
+    emitter.on('node:editing', (event) => {
+      var currentItem = findItem(data, event.id);
+      var node = currentItem.node;
+
+      node.type = 'edit-state-node'
+      node.data = {
+        field: event.data.field,
+        comparison: event.data.comparison,
+        value: event.data.value
+      }
+      node.width = 500
+
+      render()
+    })
   },
   mounted() {
     graph = new Graph({
