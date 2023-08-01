@@ -4,6 +4,9 @@ export const isLogical = (type) => {
 
 
 export const getKeywordName = (keyword) => {
+    if (!keyword) {
+        return ""
+    }
     var value = "";
     switch (keyword) {
         case "$eq":

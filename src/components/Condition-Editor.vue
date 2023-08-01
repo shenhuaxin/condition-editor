@@ -175,7 +175,6 @@ export default defineComponent({
     emitter.on('node:add', (event) => {
       var parentId = event.id;
       var item = findItem(data, parentId)?.node;
-      console.log(item)
       if (item) {
         var newNode;
         if (isLogical(event.type)) {
@@ -206,7 +205,7 @@ export default defineComponent({
       }
       render()
     })
-    emitter.on('node:change', (event) => {
+    emitter.on('node:edit', (event) => {
       var nodeId = event.id;
       var currentItem = findItem(data, nodeId);
       var item = currentItem?.node;
@@ -219,6 +218,36 @@ export default defineComponent({
       }
       render()
     })
+    emitter.on('node:change:logical', (event) => {
+      var currentItem = findItem(data, event.id);
+      currentItem.node.data = event.data
+      render()
+    })
+    // emitter.on('node:editing', (event) => {
+    //   var currentItem = findItem(data, event.id);
+    //   var node = currentItem.node;
+    //   // var newNode = {}
+    //   // newNode.type = 'edit-state-node'
+    //   // newNode.data = {
+    //   //   field: event.data.field,
+    //   //   comparison: event.data.comparison,
+    //   //   value: event.data.value
+    //   // }
+    //   // newNode.height = 30
+    //   // newNode.width = 500
+    //   // newNode.id = Math.random()
+    //   // currentItem.parent.children.push(newNode)
+    //   var newNode = {
+    //     id: Math.random(),
+    //     type: 'edit-state-node',
+    //     width: 500,
+    //     height: 30,
+    //     data: {
+    //     }
+    //   }
+    //   // currentItem.node.children.push(newNode)
+    //   // render()
+    // })
   },
   mounted() {
     graph = new Graph({
@@ -246,6 +275,7 @@ export default defineComponent({
         enabled: true,
         modifiers: ['ctrl', 'meta']
       },
+      interacting: {nodeMovable: false}
     })
     render()
   },
@@ -362,7 +392,7 @@ const render = () => {
                 source: {
                   cell: data.id,
                   anchor: {
-                    name:  'center',
+                    name: 'center',
                     args: {
                       dx: '25%'
                     }

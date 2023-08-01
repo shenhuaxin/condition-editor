@@ -2,16 +2,12 @@
   <div>
     <n-popover style="padding: 0; background-color: rgba(33, 84, 254, 1)" :show-arrow="false" trigger="hover">
       <template #trigger>
-        <n-button :bordered="false"
-                  :style="btnStyle"
-                  @click="change">
-          <template #icon>
-            <n-icon>
-              <switch-icon/>
-            </n-icon>
-          </template>
+        <div :style="btnStyle">
+          <n-icon @click="change" size="small">
+            <switch-icon/>
+          </n-icon>
           {{ getKeywordName(data.logicalType).toUpperCase() }}
-        </n-button>
+        </div>
       </template>
       <n-space>
         <n-popselect v-model:value="addNodeType" @click="addChildNode(addNodeType)" :options="options" trigger="hover">
@@ -72,13 +68,19 @@ export default defineComponent({
 
     let change = function () {
       var data = node.getData();
-      data.text = "OR"
-      node.setData(data)
-      updateText()
+      var newType = ""
+      if (data.logicalType === '$and') {
+        newType = '$or'
+      } else if (data.logicalType === '$or') {
+        newType = '$and'
+      }
+      data.logicalType = newType
+      emitter.emit('node:change:logical', {
+        id: node.id,
+        data: node.data
+      })
     }
-    let updateText = function () {
-      data.value = node.getData()
-    }
+
     let addChildNode = function (value) {
       emitter.emit('node:add', {id: node.id, type: value})
     }
@@ -109,6 +111,11 @@ export default defineComponent({
       } else if (logicalType === '$or') {
         return "width: 100px; color: rgb(22,109,66); background-color: rgba(196, 229, 211, 1)"
       }
+      // if (logicalType === '$and') {
+      //   return "width: 100px; height: 30px; line-height: 30px; display: table-cell; text-align:center; color: rgb(50,96,223); background-color: rgba(193, 213, 253, 1)"
+      // } else if (logicalType === '$or') {
+      //   return "width: 100px; height: 30px;line-height: 30px; display: table-cell; text-align:center;  color: rgb(22,109,66); background-color: rgba(196, 229, 211, 1)"
+      // }
       return ""
     })
 

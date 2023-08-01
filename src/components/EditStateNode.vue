@@ -33,12 +33,12 @@ export default {
       }
     ]
     let confirm = () => {
-      emitter.emit("node:change", {
+      emitter.emit('node:edit', {
         id: node.id,
-        field: editNodeData.value.field,
+        field: editNodeData.value?.field,
         type: 'comparison-node',
-        comparison: editNodeData.value.comparison,
-        value: editNodeData.value.value
+        comparison: editNodeData.value?.comparison,
+        value: editNodeData.value?.value
       })
     }
 
