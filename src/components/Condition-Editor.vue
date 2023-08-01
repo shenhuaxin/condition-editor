@@ -14,7 +14,6 @@ import Hierarchy from "@antv/hierarchy";
 import insertCss from 'insert-css'
 import LogicalNode from "@/components/LogicalNode.vue";
 import ComparisonsNode from "@/components/ComparisonsNode.vue";
-import mitt from "mitt";
 import emitter from "@/util/mitt.ts";
 import EditStateNode from "@/components/EditStateNode";
 import {isLogical} from "@/util/node.ts";
@@ -159,7 +158,7 @@ export default defineComponent({
           node: data,
         }
       }
-      const { children } = data
+      const {children} = data
       if (children) {
         for (let i = 0, len = children.length; i < len; i += 1) {
           const res = findItem(children[i], id)
@@ -186,7 +185,7 @@ export default defineComponent({
             width: 100,
             height: 30,
             data: {
-              text: event.type
+              logicalType: event.type
             }
           }
         } else {
@@ -196,7 +195,6 @@ export default defineComponent({
             width: 500,
             height: 30,
             data: {
-              text: "indCode = '123'"
             }
           }
         }
@@ -208,7 +206,19 @@ export default defineComponent({
       }
       render()
     })
-
+    emitter.on('node:change', (event) => {
+      var nodeId = event.id;
+      var currentItem = findItem(data, nodeId);
+      var item = currentItem?.node;
+      item.type = event.type
+      item.width = 160
+      item.data = {
+        field: event.field,
+        comparison: event.comparison,
+        value: event.value
+      }
+      render()
+    })
   },
   mounted() {
     graph = new Graph({
@@ -236,7 +246,6 @@ export default defineComponent({
         enabled: true,
         modifiers: ['ctrl', 'meta']
       },
-      interacting: { nodeMovable: false }
     })
     render()
   },
@@ -245,21 +254,21 @@ var data = {
   id: "1",
   type: 'logical-node',
   data: {
-    text: "AND"
+    logicalType: "$and"
   },
   isRoot: true,
   width: 100,
-  height: 40,
+  height: 30,
   children: [
     {
       id: "4",
       type: 'logical-node',
       data: {
-        text: "OR"
+        logicalType: "$or"
       },
       isRoot: true,
       width: 100,
-      height: 40,
+      height: 30,
       children: [
         {
           id: "5",
@@ -267,7 +276,9 @@ var data = {
           width: 160,
           height: 30,
           data: {
-            text: "indCode = '123'"
+            field: "IND_CODE",
+            comparison: "$eq",
+            value: "A12389"
           }
         },
         {
@@ -276,7 +287,9 @@ var data = {
           width: 160,
           height: 40,
           data: {
-            text: "dataType = 1"
+            field: "DATA_TYPE",
+            comparison: "$eq",
+            value: "3"
           }
         }
       ]
@@ -287,7 +300,9 @@ var data = {
       width: 160,
       height: 30,
       data: {
-        text: "indCode = '123'"
+        field: "DATA_TYPE",
+        comparison: "$ne",
+        value: "3"
       }
     },
     {
@@ -296,7 +311,9 @@ var data = {
       width: 160,
       height: 40,
       data: {
-        text: "dataType = 1"
+        field: "DATA_TYPE",
+        comparison: "$like",
+        value: "3%"
       }
     }
   ]

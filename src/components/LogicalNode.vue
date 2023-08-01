@@ -3,18 +3,18 @@
     <n-popover style="padding: 0; background-color: rgba(33, 84, 254, 1)" :show-arrow="false" trigger="hover">
       <template #trigger>
         <n-button :bordered="false"
-                  style="width: 100px; color: rgb(50,96,223); background-color: rgba(193, 213, 253, 1)"
+                  :style="btnStyle"
                   @click="change">
           <template #icon>
             <n-icon>
               <switch-icon/>
             </n-icon>
           </template>
-          {{ data.text }}
+          {{ getKeywordName(data.logicalType).toUpperCase() }}
         </n-button>
       </template>
       <n-space>
-        <n-popselect v-model:value="addNodeType"  @click="addChildNode(addNodeType)" :options="options" trigger="hover">
+        <n-popselect v-model:value="addNodeType" @click="addChildNode(addNodeType)" :options="options" trigger="hover">
           <n-button quaternary circle>
             <template #icon>
               <n-icon color="#fff">
@@ -37,16 +37,18 @@
 </template>
 
 <script>
-import {defineComponent, inject, onMounted, ref} from 'vue'
+import {computed, defineComponent, inject, onMounted, ref} from 'vue'
 import {NButton, NIcon, NPopover, useMessage, NSpace, NPopselect} from 'naive-ui'
 import SwitchIcon from "@/assets/Switch-Icon.vue";
 import DeleteIcon from "@/assets/DeleteIcon.vue";
 import AddIcon from "@/assets/AddIcon.vue";
 import EditIcon from "@/assets/EditIcon.vue";
 import emitter from "@/util/mitt.ts";
+import {getKeywordName} from "@/util/node.ts";
 
 export default defineComponent({
   name: 'LogicalNode',
+  methods: {getKeywordName},
   components: {
     EditIcon,
     AddIcon,
@@ -100,7 +102,18 @@ export default defineComponent({
         value: "$neq"
       }
     ]
+    var logicalType = node.getData().logicalType
+    const btnStyle = computed(() => {
+      if (logicalType === '$and') {
+        return "width: 100px; color: rgb(50,96,223); background-color: rgba(193, 213, 253, 1)"
+      } else if (logicalType === '$or') {
+        return "width: 100px; color: rgb(22,109,66); background-color: rgba(196, 229, 211, 1)"
+      }
+      return ""
+    })
+
     return {
+      btnStyle,
       addNodeType,
       options,
       data,

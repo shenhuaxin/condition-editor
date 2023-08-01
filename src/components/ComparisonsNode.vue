@@ -1,18 +1,29 @@
 <template>
-  <div class="grid-border ">
-    <n-ellipsis class="font" style="max-width: 100px">IND_CODE</n-ellipsis>
-    <a style="font-weight: bold"> = </a>
-    <n-ellipsis class="font" style="max-width: 80px">C202108123213</n-ellipsis>
+  <div style="background-color: #fff" class="grid-border ">
+    <n-ellipsis class="font" style="max-width: 100px">{{data.field}}</n-ellipsis>
+    <a style="font-weight: bold; margin: 0 5px"> {{getKeywordName(data.comparison).toUpperCase()}} </a>
+    <n-ellipsis class="font" style="max-width: 80px">{{ data.value }}</n-ellipsis>
   </div>
 </template>
 <script>
-import {defineComponent} from 'vue'
+import {defineComponent, inject} from 'vue'
 import {NGrid, NGridItem, NEllipsis} from 'naive-ui'
+import {getKeywordName} from "@/util/node.ts";
 
 export default defineComponent({
   name: "ComparisonsNode",
+  methods: {getKeywordName},
   components: {
     NGrid, NGridItem, NEllipsis
+  },
+  setup() {
+    const getNode = inject('getNode')
+    var node = getNode()
+    var data = node.getData();
+    console.log(data)
+    return {
+      data
+    }
   },
   mounted() {
 
