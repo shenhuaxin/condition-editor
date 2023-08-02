@@ -7,7 +7,7 @@
 </template>
 
 <script>
-import ConditionEditor from './components/Condition-Editor.vue'
+import ConditionEditor from './components/ConditionEditor.vue'
 import {NMessageProvider, NConfigProvider} from "naive-ui";
 
 
