@@ -16,6 +16,13 @@
             </n-icon>
           </template>
         </n-button>
+        <n-button @click="deleteNode" quaternary circle>
+          <template #icon>
+            <n-icon color="#fff">
+              <delete-icon/>
+            </n-icon>
+          </template>
+        </n-button>
       </n-space>
     </n-popover>
   </div>
@@ -52,8 +59,13 @@ export default defineComponent({
         }
       })
     }
+    const deleteNode = () => {
+      emitter.emit('node:delete', {
+        id: node.id
+      })
+    }
     return {
-      data, editNode
+      data, editNode, deleteNode
     }
   },
   mounted() {

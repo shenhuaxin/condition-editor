@@ -2,6 +2,44 @@ export const isLogical = (type) => {
     return type === "$and" || type === "$or"
 }
 
+export const   options = [
+    {
+        label: "=",
+        value: '$eq'
+    },
+    {
+        label: "!=",
+        value: "$ne"
+    },
+    {
+        label: ">",
+        value: "$gt"
+    },
+    {
+        label: ">=",
+        value: "$gte"
+    },
+    {
+        label: "<",
+        value: "$lt"
+    },
+    {
+        label: "<=",
+        value: "$lte"
+    },
+    {
+        label: "in",
+        value: "$in"
+    },
+    {
+        label: "not in",
+        value: "$nin"
+    },
+    {
+        label: "like",
+        value: "$like"
+    },
+]
 
 export const getKeywordName = (keyword) => {
     if (!keyword) {

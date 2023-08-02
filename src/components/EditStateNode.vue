@@ -11,6 +11,7 @@
 import {computed, inject, ref, watch} from "vue";
 import {NInput, NInputGroup, NInputGroupLabel, NSelect, NSpace, NButton} from "naive-ui";
 import emitter from "@/util/mitt.ts";
+import {options} from "@/util/node.ts";
 
 export default {
   name: "EditStateNode",
@@ -26,16 +27,7 @@ export default {
       value: node.getData().value
     })
     const isComparison = ref(false);
-    const options = [
-      {
-        label: "=",
-        value: '$eq'
-      },
-      {
-        label: "!=",
-        value: "$neq"
-      }
-    ]
+
     let confirm = () => {
       emitter.emit('node:edit', {
         id: node.id,

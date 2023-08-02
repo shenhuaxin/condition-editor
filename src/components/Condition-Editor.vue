@@ -237,6 +237,17 @@ export default defineComponent({
 
       render()
     })
+    emitter.on('node:delete', (event) => {
+      var currentItem = findItem(data, event.id);
+      const dataItem = currentItem?.parent
+      if (dataItem && dataItem.children) {
+        const { children } = dataItem
+        const index = children.findIndex((item) => item.id === event.id)
+        children.splice(index, 1)
+        render()
+      }
+      return null
+    })
   },
   mounted() {
     graph = new Graph({
@@ -278,64 +289,6 @@ var data = {
   isRoot: true,
   width: 100,
   height: 30,
-  children: [
-    {
-      id: "4",
-      type: 'logical-node',
-      data: {
-        logicalType: "$or"
-      },
-      isRoot: true,
-      width: 100,
-      height: 30,
-      children: [
-        {
-          id: "5",
-          type: 'comparison-node',
-          width: 160,
-          height: 30,
-          data: {
-            field: "IND_CODE",
-            comparison: "$eq",
-            value: "A12389"
-          }
-        },
-        {
-          id: "6",
-          type: 'comparison-node',
-          width: 160,
-          height: 40,
-          data: {
-            field: "DATA_TYPE",
-            comparison: "$eq",
-            value: "3"
-          }
-        }
-      ]
-    },
-    {
-      id: "2",
-      type: 'comparison-node',
-      width: 160,
-      height: 30,
-      data: {
-        field: "DATA_TYPE",
-        comparison: "$ne",
-        value: "3"
-      }
-    },
-    {
-      id: "3",
-      type: 'comparison-node',
-      width: 160,
-      height: 40,
-      data: {
-        field: "DATA_TYPE",
-        comparison: "$like",
-        value: "3%"
-      }
-    }
-  ]
 }
 // eslint-disable-next-line no-unused-vars
 const render = () => {

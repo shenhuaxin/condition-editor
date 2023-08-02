@@ -85,6 +85,7 @@ export default defineComponent({
       emitter.emit('node:add', {id: node.id, type: value})
     }
     let deleteNode = function () {
+      emitter.emit('node:delete', {id: node.id})
     }
     const options = [
       {
