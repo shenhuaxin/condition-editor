@@ -1,6 +1,6 @@
 <template>
-  <div class="app-content">
-    <div style="height: 1000px" id="container"></div>
+  <div>
+    <div style="height: 400px" id="container"></div>
     <TeleportContainer/>
   </div>
 </template>
@@ -12,145 +12,25 @@ import {Graph, Path} from '@antv/x6'
 import {register, getTeleport} from '@antv/x6-vue-shape'
 import Hierarchy from "@antv/hierarchy";
 import insertCss from 'insert-css'
-import LogicalNode from "@/components/LogicalNode.vue";
-import ComparisonsNode from "@/components/ComparisonsNode.vue";
 import emitter from "@/util/mitt.ts";
-import EditStateNode from "@/components/EditStateNode";
 import {isLogical} from "@/util/node.ts";
+import {initX6} from "@/util/x6.ts";
+import {useMessage} from "naive-ui";
 
-
-register({
-  shape: 'logical-node',
-  component: LogicalNode
-})
-register({
-  shape: 'comparison-node',
-  component: ComparisonsNode
-})
-register({
-  shape: 'edit-state-node',
-  component: EditStateNode
-})
-Graph.registerEdge(
-    'mindmap-edge',
-    {
-      inherit: 'edge',
-      router: {
-        name: 'manhattan',
-        args: {
-          startDirections: ['right'],
-          endDirections: ['left']
-        }
-      },
-      connector: {
-        name: 'rounded'
-      },
-      attrs: {}, //样式代码
-      zIndex: 0
-    },
-    true,
-)
-// 连接器
-Graph.registerConnector(
-    'mindmap',
-    (sourcePoint, targetPoint, routerPoints, options) => {
-      const midX = sourcePoint.x + 10
-      const midY = sourcePoint.y
-      const ctrX = (targetPoint.x - midX) / 5 + midX
-      const ctrY = targetPoint.y
-      const pathData = `
-     M ${sourcePoint.x} ${sourcePoint.y}
-     L ${midX} ${midY}
-     Q ${ctrX} ${ctrY} ${targetPoint.x} ${targetPoint.y}
-    `
-      return options.raw ? Path.parse(pathData) : pathData
-    },
-    true,
-)
-
-Graph.registerNode('relative', {
-  inherit: 'rect',
-  markup: [
-    {
-      tagName: 'rect',
-      selector: 'body'
-    },
-    {
-      tagName: 'image',
-      selector: 'switch'
-    },
-    {
-      tagName: 'text',
-      selector: 'label_text'
-    },
-
-  ],
-  attrs: { //样式代码
-    body: {},
-    switch: {
-      event: 'change:relative', //关系节点 切换 关系事件
-      width: 16,
-      height: 16,
-      x: 12,
-      y: 12,
-    },
-    label_text: {text: '并且'}
-  },
-  data: {relative: 'and'} //and并且 or或者 默认为 并且
-})
-Graph.registerNode('condition-text', {
-      inherit: 'rect',
-      markup: [
-        {
-          tagName: 'rect',
-          selector: 'body'
-        },
-        {
-          tagName: 'g',
-          attrs: { class: 'content' },
-          children: [
-            {
-              tagName: 'text',
-              textContent: "指标值",
-              attrs: {
-                x: 0,
-                width: 20
-              }
-            },
-            {
-              tagName: 'text',
-              textContent: "等于",
-              attrs: {
-                x: 20,
-                width: 20
-              }
-            },
-            {
-              tagName: 'text',
-              textContent: "123",
-              attrs: {
-                x: 40,
-                width: 20
-              }
-            }
-          ]
-        },
-      ],
-      attrs: {
-        body: {}
-      }//样式代码
-    }
-)
+initX6()
 
 const TeleportContainer = getTeleport()
 
 let graph = null;
 export default defineComponent({
   name: 'ConditionEditor',
+  props: ['data'],
   components: {
     TeleportContainer,
   },
-  setup() {
+  setup(prop) {
+    var data = prop?.data
+    var message = useMessage()
     const findItem = (data, id) => {
       if (data.id === id) {
         return {
@@ -245,9 +125,81 @@ export default defineComponent({
         const index = children.findIndex((item) => item.id === event.id)
         children.splice(index, 1)
         render()
+      } else {
+        message.warning("根节点不可删除")
       }
-      return null
     })
+    const render = () =>  {
+      const result = Hierarchy.mindmap(data, {
+        direction: 'H',
+        getHeight(d) {
+          return d.height
+        },
+        getWidth(d) {
+          return d.width
+        },
+        getHGap() {
+          return 40
+        },
+        getVGap() {
+          return 20
+        },
+        getSide: () => {
+          return 'right'
+        },
+      })
+      const cells = []
+      const traverse = (hierarchyItem) => {
+        if (hierarchyItem) {
+          const {data, children} = hierarchyItem
+          cells.push(
+              graph.createNode({
+                id: data.id,
+                shape: data.type,
+                width: data.width,
+                height: data.height,
+                data: data.data,
+                x: hierarchyItem.x,
+                y: hierarchyItem.y
+              }),
+          )
+          if (children) {
+            children.forEach((item) => {
+              const {id} = item
+              cells.push(
+                  graph.createEdge({
+                    shape: 'mindmap-edge',
+                    source: {
+                      cell: data.id,
+                      anchor: {
+                        name: 'center',
+                        args: {
+                          dx: '25%'
+                        }
+                      }
+                    },
+                    target: {
+                      cell: id,
+                      anchor: {
+                        name: 'left'
+                      }
+                    },
+                  }))
+              traverse(item)
+            })
+          }
+        }
+      }
+      traverse(result)
+      graph.resetCells(cells)
+      graph.centerContent()
+    }
+    return {
+      data, render
+    }
+  },
+  methods:{
+
   },
   mounted() {
     graph = new Graph({
@@ -277,86 +229,11 @@ export default defineComponent({
       },
       interacting: {nodeMovable: false}
     })
-    render()
+    this.render()
   },
 })
-var data = {
-  id: "1",
-  type: 'logical-node',
-  data: {
-    logicalType: "$and"
-  },
-  isRoot: true,
-  width: 100,
-  height: 30,
-}
+
 // eslint-disable-next-line no-unused-vars
-const render = () => {
-  const result = Hierarchy.mindmap(data, {
-    direction: 'H',
-    getHeight(d) {
-      return d.height
-    },
-    getWidth(d) {
-      return d.width
-    },
-    getHGap() {
-      return 40
-    },
-    getVGap() {
-      return 20
-    },
-    getSide: () => {
-      return 'right'
-    },
-  })
-  const cells = []
-  const traverse = (hierarchyItem) => {
-    if (hierarchyItem) {
-      const {data, children} = hierarchyItem
-      cells.push(
-          graph.createNode({
-            id: data.id,
-            shape: data.type,
-            width: data.width,
-            height: data.height,
-            data: data.data,
-            x: hierarchyItem.x,
-            y: hierarchyItem.y
-          }),
-      )
-      if (children) {
-        children.forEach((item) => {
-          const {id} = item
-          cells.push(
-              graph.createEdge({
-                shape: 'mindmap-edge',
-                source: {
-                  cell: data.id,
-                  anchor: {
-                    name: 'center',
-                    args: {
-                      dx: '25%'
-                    }
-                  }
-                },
-                target: {
-                  cell: id,
-                  anchor: {
-                    name: 'left'
-                  }
-                },
-              }))
-          traverse(item)
-        })
-      }
-    }
-  }
-  traverse(result)
-  console.log(cells)
-  graph.resetCells(cells)
-  graph.centerContent()
-}
 
 insertCss(`
   .topic-image {
