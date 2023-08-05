@@ -1,7 +1,7 @@
 <template>
   <div>
     <n-button @click="query" type="info">
-      生成 dsl
+      查询
     </n-button>
   </div>
 </template>
@@ -9,18 +9,27 @@
 import {defineComponent} from 'vue'
 import {NButton} from "naive-ui";
 import {isLogical} from "@/util/node.ts";
+import axios from "axios";
+import {request} from "@/util/request.ts";
+import emitter from "@/util/mitt.ts";
 
 export default defineComponent({
   name: "Tools",
-  props: ['data'],
+  props: ['data', 'columns', 'tableData'],
   components: {
     NButton
   },
   setup(prop) {
     var data = prop.data
+    var columns = prop.columns
+    var tableData = prop.tableData
     const query = () => {
       var dsl = createDsl(data)
-      console.log(JSON.stringify(dsl))
+      axios.post("benAppData/querydsl", {query:dsl})
+          .then(res => {
+            emitter.emit("data:query", {data: res})
+          }).catch(e => {
+      })
     }
     const createDsl = (node) => {
       var childDsl;
