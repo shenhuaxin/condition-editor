@@ -1,24 +1,8 @@
-# condition-editor
+效果如图所示：
 
-## Project setup
-```
-npm install
-```
+![./doc/img/img1.png](doc/img/img1.png)
+![./doc/img/img.png](doc/img/img.png)
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
 
-### Compiles and minifies for production
-```
-npm run build
-```
 
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+配合 https://github.com/shenhuaxin/query-dsl-json.git 一起使用
